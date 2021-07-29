@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Dictionary {
-    Map<String, String> map = new HashMap<String, String>();
-    Rule rule;
+    private Map<String, String> map = new HashMap<String, String>();
+    private Rule rule;
 
     public Dictionary(Rule rule){
         this.rule = rule;

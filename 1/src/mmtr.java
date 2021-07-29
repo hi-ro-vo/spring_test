@@ -1,3 +1,5 @@
+import DictionaryNew.*;
+
 import java.io.BufferedReader;
 import java.io.Console;
 import java.io.InputStreamReader;
@@ -7,28 +9,16 @@ import java.util.regex.Pattern;
 
 public class mmtr {
     public static void main(String[] args) {
-        Dictionary[] dictionaries = new Dictionary[2];
-        dictionaries[0] = new Dictionary(new Rule() {
-            @Override
-            public Boolean isSuitable(String key) {
-                return key.matches("^[a-zA-Z]{4}$");
-            }
-        });
+        DictionaryNew[] dictionaries = new DictionaryNew[2];
 
-        dictionaries[0].add("qwer", "qwert");
+        dictionaries[0] = new Dictionary1();
         try {
             dictionaries[0].readFromFile("dic1.txt");
         } catch (Exception e){
             System.err.println(e.getMessage());
         }
 
-        dictionaries[1] = new Dictionary(new Rule() {
-            @Override
-            public Boolean isSuitable(String key) {
-                return key.matches("^[0-9]{5}$");
-            }
-        });
-
+        dictionaries[1] = new Dictionary2();
         try {
             dictionaries[1].readFromFile("dic2.txt");
         } catch (Exception e){
