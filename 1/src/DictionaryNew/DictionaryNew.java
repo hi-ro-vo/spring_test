@@ -13,19 +13,21 @@ public abstract class DictionaryNew{
     public void readFromFile(String filePath) throws FileNotFoundException, IOException{
         String line;
         BufferedReader reader = new BufferedReader(new FileReader(filePath));
-        while ((line = reader.readLine()) != null)
-        {
-            String[] parts = line.split(":", 2);
-            if (parts.length >= 2 && isRuleFulfilled(parts[0]))
+        try (reader) {
+            while ((line = reader.readLine()) != null)
             {
-                String key = parts[0];
-                String value = parts[1];
-                map.put(key, value);
-            } else {
-                System.err.println("ignoring line: " + line);
+                String[] parts = line.split(":", 2);
+                if (parts.length >= 2 && isRuleFulfilled(parts[0]))
+                {
+                    String key = parts[0];
+                    String value = parts[1];
+                    map.put(key, value);
+                } else {
+                    System.err.println("ignoring line: " + line);
+                }
             }
         }
-        reader.close();
+
     };
     public void delete(String key){
         map.remove(key);
