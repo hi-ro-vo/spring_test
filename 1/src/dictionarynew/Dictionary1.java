@@ -1,4 +1,4 @@
-package DictionaryNew;
+package dictionarynew;
 
 public class Dictionary1 extends DictionaryNew{
 

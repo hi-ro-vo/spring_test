@@ -1,4 +1,4 @@
-package DictionaryNew;
+package dictionarynew;
 
 public class Dictionary2 extends DictionaryNew{
     @Override
