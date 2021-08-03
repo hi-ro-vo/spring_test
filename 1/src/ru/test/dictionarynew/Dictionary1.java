@@ -1,6 +1,6 @@
-package dictionarynew;
+package ru.test.dictionarynew;
 
-public class Dictionary1 extends DictionaryNew{
+public class Dictionary1 extends AbstractDictionary {
 
     @Override
     boolean isRuleFulfilled(String s) {

@@ -1,13 +1,12 @@
-package dictionarynew;
+package ru.test.dictionarynew;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class DictionaryNew {
+public abstract class AbstractDictionary {
     private Map<String, String> map = new HashMap<>();
 
     public void readFromFile(String filePath) throws IOException {
