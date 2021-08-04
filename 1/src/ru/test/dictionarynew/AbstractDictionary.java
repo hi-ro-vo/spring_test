@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public abstract class AbstractDictionary {
     private Map<String, String> map = new HashMap<>();
@@ -26,12 +27,16 @@ public abstract class AbstractDictionary {
         }
     }
 
-    public void delete(String key) {
-        map.remove(key);
+    public void loadFromMap(Map<String, String> map){//TODO: добавить проверку пришедшей мапы на валидность
+        this.map = map;
     }
 
-    public String find(String key) {
-        return map.get(key);
+    public boolean delete(String key) {
+        return map.remove(key) != null;
+    }
+
+    public Optional<String> find(String key) {
+        return Optional.of(map.get(key));
     }
 
     public void add(String key, String value) {
@@ -46,6 +51,6 @@ public abstract class AbstractDictionary {
         return map;
     }
 
-    abstract boolean isRuleFulfilled(String s);
+    abstract public boolean isRuleFulfilled(String s);
 
 }
