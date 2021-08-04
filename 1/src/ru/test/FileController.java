@@ -9,10 +9,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class FileController {
-    static final private  Logger logger = Logger.getLogger("ru.test.file.controller");
+    static final private Logger logger = Logger.getLogger("ru.test.file.controller");
 
-    public Optional<Map<String, String>> readFromFile(String filePath, Predicate<String> isRuleFulfilled)
-    {
+    public Optional<Map<String, String>> readFromFile(String filePath, Predicate<String> isRuleFulfilled) {
         Map<String, String> result = new HashMap<>();
         String line;
         try {
@@ -26,26 +25,27 @@ public class FileController {
                         result.put(key, value);
                     } else {
                         System.err.println("ignoring line: " + line);
+                        logger.log(Level.INFO, "ignoring line: " + line);
                     }
                 }
             }
-        } catch (IOException e){
-            logger.log(Level.FINE, "При чтении файла "+ filePath +" произошла ошибка", e);
+        } catch (IOException e) {
+            logger.log(Level.FINE, "При чтении файла " + filePath + " произошла ошибка", e);
             return Optional.empty();
         }
         return Optional.of(result);
     }
 
-    public boolean saveToFile(String filePath, Map<String, String> map){
+    public boolean saveToFile(String filePath, Map<String, String> map) {
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(filePath));
             //map.forEach((key, value) -> writer.write(key+":"+value));//TODO: Спросить как еще это ограничение можно обойти
-            for (Map.Entry<String, String> entry: map.entrySet()){
-                writer.write(entry.getKey()+":"+entry.getValue()+"\n");
+            for (Map.Entry<String, String> entry : map.entrySet()) {
+                writer.write(entry.getKey() + ":" + entry.getValue() + "\n");
             }
             writer.close();
         } catch (IOException e) {
-            logger.log(Level.FINE, "При записи в файл "+ filePath +" произошла ошибка", e);
+            logger.log(Level.FINE, "При записи в файл " + filePath + " произошла ошибка", e);
             return false;
         }
         return true;

@@ -10,23 +10,6 @@ import java.util.Optional;
 public abstract class AbstractDictionary {
     private Map<String, String> map = new HashMap<>();
 
-    public void readFromFile(String filePath) throws IOException {
-        String line;
-        BufferedReader reader = new BufferedReader(new FileReader(filePath));
-        try (reader) {
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(":", 2);
-                String key = parts[0];
-                String value = parts[1];
-                if (parts.length == 2 && isRuleFulfilled(key)) {
-                    map.put(key, value);
-                } else {
-                    System.err.println("ignoring line: " + line);
-                }
-            }
-        }
-    }
-
     public void loadFromMap(Map<String, String> map){//TODO: добавить проверку пришедшей мапы на валидность
         this.map = map;
     }
