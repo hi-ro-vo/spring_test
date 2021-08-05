@@ -1,10 +1,6 @@
 package ru.test;
 
-import ru.test.dictionarynew.AbstractDictionary;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.Map;
+import ru.test.dictionaries.DictionariesController;
 
 public class Mmtr {
 

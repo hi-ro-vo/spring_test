@@ -1,4 +1,4 @@
-package ru.test.dictionarynew;
+package ru.test.dictionaries.dictionary;
 
 public class Dictionary1 extends AbstractDictionary {
 

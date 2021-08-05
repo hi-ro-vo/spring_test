@@ -1,4 +1,4 @@
-package ru.test;
+package ru.test.dictionaries;
 
 import java.io.*;
 import java.util.HashMap;
