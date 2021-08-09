@@ -7,7 +7,7 @@ import java.util.Optional;
 public abstract class AbstractDictionary {
     private Map<String, String> map = new HashMap<>();
 
-    public void loadFromMap(Map<String, String> map){//TODO: добавить проверку пришедшей мапы на валидность
+    public void loadFromMap(Map<String, String> map) {//TODO: добавить проверку пришедшей мапы на валидность
         this.map = map;
     }
 
@@ -16,7 +16,7 @@ public abstract class AbstractDictionary {
     }
 
     public Optional<String> find(String key) {
-        return Optional.of(map.get(key));
+        return Optional.ofNullable(map.get(key));
     }
 
     public void add(String key, String value) {

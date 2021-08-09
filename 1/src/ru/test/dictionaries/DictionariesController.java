@@ -2,50 +2,30 @@ package ru.test.dictionaries;
 
 import ru.test.dictionaries.commands.Command;
 import ru.test.dictionaries.commands.CommandsEnum;
-import ru.test.dictionaries.dictionary.*;
+import ru.test.dictionaries.dao.DictionaryDAO;
+import ru.test.dictionaries.dao.FileController;
+import ru.test.dictionaries.dictionary.AbstractDictionary;
+import ru.test.dictionaries.dictionary.LatinicDictionary;
+import ru.test.dictionaries.dictionary.NumericDictionary;
+import ru.test.dictionaries.exeptions.IllegalArgumentsCountException;
+import ru.test.dictionaries.exeptions.NotACommandException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class DictionariesController {
-    public enum DictionaryType {
-        LATINIC_DICTIONARY, NUMERIC_DICTIONARY
-    }
-
-    static final private Logger logger = Logger.getLogger("ru.test.dictionaries.controller");
-    private final Dictionary1 latinicDictionary = new Dictionary1();
-    private final Dictionary2 numericDictionary = new Dictionary2();
+    private static final  Logger logger = Logger.getLogger(DictionariesController.class.getName());
+    private final LatinicDictionary latinicDictionary = new LatinicDictionary();
+    private final NumericDictionary numericDictionary = new NumericDictionary();
+    private boolean exitFlag = false;
     private DictionaryType currentDictionary = DictionaryType.LATINIC_DICTIONARY;
-    private boolean loadedSuccessfully;
-    private final FileController fileController = new FileController();
-    private final CommandFactory commandFactory;
+
 
     public DictionariesController() {
         logger.setLevel(Level.ALL);
-        ConsoleHandler c = new ConsoleHandler();
-        c.setLevel(Level.ALL);
-        logger.addHandler(c);
-        loadedSuccessfully = true;
-
-        commandFactory = new CommandFactory(this);
-
-        Optional<Map<String, String>> map, map1;
-        map = fileController.readFromFile("dic1.txt", latinicDictionary::isRuleFulfilled);
-        map.ifPresent(latinicDictionary::loadFromMap);
-
-        map1 = fileController.readFromFile("dic2.txt", numericDictionary::isRuleFulfilled);
-        map1.ifPresent(numericDictionary::loadFromMap);
-
-        if (map.isEmpty() || map1.isEmpty()) loadedSuccessfully = false;
-
     }
 
     public AbstractDictionary getCurrentDictionary() {
@@ -64,50 +44,48 @@ public class DictionariesController {
         }
     }
 
-
-
-
-
-    public void saveDictionaries() {
-        if (!fileController.saveToFile("dic1.txt", latinicDictionary.getMap()) ||
-                !fileController.saveToFile("dic2.txt", numericDictionary.getMap())) {
-            System.err.println("Проблемы при сохранении словарей");
-        }
-    }
-
-    boolean exitFlag = false;//TODO: Вынес из start() для реализации команды exit;
-
     public void exit() {
         exitFlag = true;
     }
 
-    public void start() {
-        if (!loadedSuccessfully) {
-            System.err.println("Проверьте доступность и расположение файлов словарей");
+    public void start(String firstFilePath, String secondFilePath) {
+
+        DictionaryDAO latinicDAO = new FileController(latinicDictionary, firstFilePath);
+        DictionaryDAO numericDAO = new FileController(numericDictionary, secondFilePath);
+
+        try {
+            latinicDAO.load();
+            numericDAO.load();
+        } catch (IOException e) {
+            logger.log(Level.WARNING, "Loading from DAO error: ", e);
             return;
         }
 
+        CommandFactory commandFactory = new CommandFactory(this);
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-        //showHelp(Commands.HELP);
+
+        try {
+            commandFactory.createCommand(CommandsEnum.HELP).execute();
+        } catch (IllegalArgumentsCountException e) {
+            logger.log(Level.FINE, e.getMessage(), e);
+        }
+
         exitFlag = false;
 
         while (!exitFlag) {
-            String line;
             try {
-                line = in.readLine();
-            } catch (IOException e) {
-                logger.log(Level.FINE, e.getMessage(), e);
-                break;
-            }
-            if (line.charAt(0) == '/') {
-                String[] strings = line.substring(1).split(" ", 3);
-                try {
-                    Command command = commandFactory.createCommand(strings[0]);
-                    command.execute(strings);
-                } catch (IllegalArgumentException e){
-                    System.err.println("Unknown command: " + strings[0]);
-                }
+                Command command = commandFactory.readCommandFromReader(in);
+                command.execute();
+            } catch (IllegalArgumentException | IOException | IllegalArgumentsCountException | NotACommandException e) {
+                System.err.println(e.getMessage());
             }
         }
+
+        latinicDAO.save();
+        numericDAO.save();
+    }
+
+    public enum DictionaryType {
+        LATINIC_DICTIONARY, NUMERIC_DICTIONARY
     }
 }

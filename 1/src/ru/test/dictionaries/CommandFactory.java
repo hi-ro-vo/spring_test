@@ -1,22 +1,23 @@
 package ru.test.dictionaries;
 
 import ru.test.dictionaries.commands.*;
-
 import ru.test.dictionaries.dictionary.AbstractDictionary;
+import ru.test.dictionaries.exeptions.IllegalArgumentsCountException;
+import ru.test.dictionaries.exeptions.NotACommandException;
 
-import java.util.Locale;
-import java.util.Optional;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class CommandFactory {
 
-    private Supplier<AbstractDictionary> getCurrentDictionary;
-    private DictionariesController dictionariesController;
+    private final Logger logger = Logger.getLogger(CommandFactory.class.getName());
     boolean resourceSeted = false;
-
-    private final Logger logger = Logger.getLogger("ru.test.dictionaries.CommandFactory");
+    private final Supplier<AbstractDictionary> getCurrentDictionary;
+    private final DictionariesController dictionariesController;
 
 
     CommandFactory(DictionariesController controller) {
@@ -26,35 +27,49 @@ public class CommandFactory {
     }
 
 
-    public Command createCommand(CommandsEnum command) {//TODO: возможно кешировать уже созданные команды;
-        Command result;
+    public Command createCommand(CommandsEnum command, String... commandArguments) throws IllegalArgumentsCountException {
+        Command result = null;
         switch (command) {
             case ADD: {
-                result = new Add(getCurrentDictionary);
+                if (commandArguments.length == 2) {
+                    result = new Add(getCurrentDictionary, commandArguments[0], commandArguments[1]);
+                }
                 break;
             }
             case DELETE: {
-                result = new Delete(getCurrentDictionary);
+                if (commandArguments.length == 1) {
+                    result = new Delete(getCurrentDictionary, commandArguments[0]);
+                }
                 break;
             }
             case SHOW: {
-                result = new Show(getCurrentDictionary);
+                if (commandArguments.length == 0) {
+                    result = new Show(getCurrentDictionary);
+                }
                 break;
             }
             case DIC: {
-                result = new ChangeDictionary(dictionariesController);
+                if (commandArguments.length == 0) {
+                    result = new ChangeDictionary(dictionariesController);
+                }
                 break;
             }
             case FIND: {
-                result = new Find(getCurrentDictionary);
+                if (commandArguments.length == 1) {
+                    result = new Find(getCurrentDictionary, commandArguments[0]);
+                }
                 break;
             }
             case HELP: {
-                result = new Help(this);
+                if (commandArguments.length == 0) {
+                    result = new Help();
+                }
                 break;
             }
             case EXIT: {
-                result = new Exit(dictionariesController);
+                if (commandArguments.length == 0) {
+                    result = new Exit(dictionariesController);
+                }
                 break;
             }
             default: {
@@ -64,19 +79,46 @@ public class CommandFactory {
 
             }
         }
+
+        if (result == null) {
+            throw new IllegalArgumentsCountException(command + " содержит не подходящее число аргументов\n");
+        }
+
         return result;
     }
 
-    public Command createCommand(String stringCommand){
+    public Command createCommand(String... stringCommand) throws IllegalArgumentsCountException {
         CommandsEnum command;
-            try {
-                command = CommandsEnum.valueOf(stringCommand.toUpperCase(Locale.ROOT));
-            } catch (IllegalArgumentException e) {
-                logger.log(Level.FINEST, "Unknown command", e);
-                throw e;
-            }
+        try {
+            command = CommandsEnum.valueOf(stringCommand[0].toUpperCase());
+        } catch (IllegalArgumentException e) {
+            logger.log(Level.FINE, "Unknown command", e);
+            IllegalArgumentException exception = new IllegalArgumentException("Unknown command: " + stringCommand[0], e);
+            throw exception;
+        }
 
-        return createCommand(command);
+        return createCommand(command, Arrays.copyOfRange(stringCommand, 1, stringCommand.length));
+    }
+
+    public Command readCommandFromReader(BufferedReader reader) throws IllegalArgumentsCountException, IOException, NotACommandException {
+        String line = null;
+        try {
+            line = reader.readLine();
+        } catch (IOException e) {
+            logger.log(Level.FINE, e.getMessage(), e);
+            throw e;
+        }
+
+        if (line.charAt(0) == '/') {
+            String[] strings = line.substring(1).split(" ", 3);
+            return createCommand(strings);
+        } else {
+            NotACommandException e = new NotACommandException("Команда должна начинаться с символа /");
+            logger.log(Level.FINE, e.getMessage(), e);
+            throw e;
+        }
+
+
     }
 }
 

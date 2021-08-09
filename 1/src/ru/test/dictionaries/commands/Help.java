@@ -1,25 +1,47 @@
 package ru.test.dictionaries.commands;
 
-import ru.test.dictionaries.CommandFactory;
-
-public class Help extends Command{
-    private final CommandFactory commandFactory;
+public class Help extends Command {
 
 
-    public Help(CommandFactory factory){
-        commandFactory = factory;
+    public Help() {
+    }
+
+    public void showHelp(CommandsEnum command) {
+        String message;
+        switch (command) {
+            case ADD:
+                message = "/add [key, value] команда для добавления новой пары в словарь";
+                break;
+            case DIC:
+                message = "/dic команда для смены словаря";
+                break;
+            case HELP:
+                message = "/help выводит список доступных команд";
+                break;
+            case EXIT:
+                message = "/exit завершение программы";
+                break;
+            case FIND:
+                message = "/find [key] команда для поиска значения в словаре по ключу";
+                break;
+            case SHOW:
+                message = "/show команда для вывода всего словаря на экран";
+                break;
+            case DELETE:
+                message = "/delete [key] команда для удаления пары из словаря по ключу";
+                break;
+            default:
+                message = "Для команды: " + command + " нет подсказки";
+        }
+
+        System.out.println(message);
+
     }
 
     @Override
-    public void showHelp() {
-        System.out.println("/help выводит список доступных команд");
-    }
-
-    @Override
-    public void execute(String... strings) {
-        for (CommandsEnum command: CommandsEnum.values()){
-            Command c = commandFactory.createCommand(command);
-            c.showHelp();
+    public void execute() {
+        for (CommandsEnum command : CommandsEnum.values()) {
+            showHelp(command);
         }
     }
 }

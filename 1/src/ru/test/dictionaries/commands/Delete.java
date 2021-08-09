@@ -4,27 +4,19 @@ import ru.test.dictionaries.dictionary.AbstractDictionary;
 
 import java.util.function.Supplier;
 
-public class Delete extends Command{
+public class Delete extends Command {
 
     private final Supplier<AbstractDictionary> Dictionary;
+    private final String key;
 
-    public Delete(Supplier<AbstractDictionary> getCurrentDictionary){
+    public Delete(Supplier<AbstractDictionary> getCurrentDictionary, String key) {
         Dictionary = getCurrentDictionary;
+        this.key = key;
     }
 
-    @Override
-    public void showHelp() {
-        System.out.println("/delete [key] команда для удаления пары из словаря по ключу");
-    }
 
     @Override
-    public void execute(String... strings) {
-        if (strings.length != 2) {
-            System.err.println("Неверная сигнатура команды");
-            showHelp();
-
-        }
-        String key = strings[1];
+    public void execute() {
         if (Dictionary.get().delete(key))
             System.err.println("В словаре нет ключа" + key);
     }

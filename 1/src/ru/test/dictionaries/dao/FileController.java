@@ -1,17 +1,25 @@
-package ru.test.dictionaries;
+package ru.test.dictionaries.dao;
+
+import ru.test.dictionaries.dictionary.AbstractDictionary;
 
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class FileController {
-    static final private Logger logger = Logger.getLogger("ru.test.file.controller");
+public class FileController implements DictionaryDAO {
+    static final private Logger logger = Logger.getLogger(FileController.class.getName());
+    private final AbstractDictionary dictionary;
+    private final String filePath;
 
-    public Optional<Map<String, String>> readFromFile(String filePath, Predicate<String> isRuleFulfilled) {
+    public FileController(AbstractDictionary dictionary, String filePath) {
+        this.dictionary = dictionary;
+        this.filePath = filePath;
+    }
+
+    private Map<String, String> readFromFile(String filePath, Predicate<String> isRuleFulfilled) throws IOException {
         Map<String, String> result = new HashMap<>();
         String line;
         try {
@@ -31,23 +39,34 @@ public class FileController {
             }
         } catch (IOException e) {
             logger.log(Level.FINE, "При чтении файла " + filePath + " произошла ошибка", e);
-            return Optional.empty();
+            throw e;
+
         }
-        return Optional.of(result);
+        return result;
     }
 
-    public boolean saveToFile(String filePath, Map<String, String> map) {
-        try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(filePath));
-            //map.forEach((key, value) -> writer.write(key+":"+value));//TODO: Спросить как еще это ограничение можно обойти
+    private boolean saveToFile(String filePath, Map<String, String> map) {
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             for (Map.Entry<String, String> entry : map.entrySet()) {
                 writer.write(entry.getKey() + ":" + entry.getValue() + "\n");
             }
-            writer.close();
         } catch (IOException e) {
-            logger.log(Level.FINE, "При записи в файл " + filePath + " произошла ошибка", e);
+            logger.log(Level.WARNING, "При записи в файл " + filePath + " произошла ошибка", e);
             return false;
         }
+
         return true;
+    }
+
+    @Override
+    public void save() {
+        saveToFile(filePath, dictionary.getMap());
+    }
+
+    @Override
+    public void load() throws IOException {
+        Map<String, String> map = readFromFile(filePath, dictionary::isRuleFulfilled);
+        dictionary.loadFromMap(map);
     }
 }
